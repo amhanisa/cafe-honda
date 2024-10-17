@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cafe Honda</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
+    </head>
+    <body>
+        <div class="section">
+            <figure class="image is-128x128 mx-auto">
+                <img src="/public/logo.png" />
+            </figure>
+            <div class="mb-6">
+                <a class="button" href="/">Home</a>
+                <a class="button" href="/order">Order</a>
+                <a class="button" href="/history">History</a>
+            </div>
+
+            <form action="/order" method="post">
+                <div class="box mb-6">
+                    <p class="title is-4 has-text-centered">Select Variant</p>
+
+                    <div class="radios">
+                        {{#each variants}}
+                        <label class="radio">
+                            <input type="radio" name="variant" value="{{id}}" required />
+                            <p>{{name}}</p>
+                            <p>drink: {{drink}}</p>
+                            <p>snack: {{snack}}</p>
+                        </label>
+                        {{/each}}
+                    </div>
+                </div>
+                <button class="button is-primary is-large is-fullwidth js-modal-trigger" id="submitButton">Add Order</button>
+            </form>
+        </div>
+        <div id="modal-js-example" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Are you sure for this order?</p>
+                    <button class="delete" aria-label="close"></button>
+                </header>
+                <section class="modal-card-body">
+                    <!-- Content ... -->
+                </section>
+                <footer class="modal-card-foot">
+                    <div class="buttons">
+                        <button class="button is-success">Order</button>
+                        <button class="button">Cancel</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </body>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Functions to open and close a modal
+            function openModal($el) {
+                $el.classList.add("is-active");
+            }
+
+            function closeModal($el) {
+                $el.classList.remove("is-active");
+            }
+
+            function closeAllModals() {
+                (document.querySelectorAll(".modal") || []).forEach(($modal) => {
+                    closeModal($modal);
+                });
+            }
+
+            // Add a click event on buttons to open a specific modal
+            (document.querySelectorAll(".js-modal-trigger") || []).forEach(($trigger) => {
+                const modal = $trigger.dataset.target;
+                const $target = document.getElementById(modal);
+
+                $trigger.addEventListener("click", () => {
+                    openModal($target);
+                });
+            });
+
+            // Add a click event on various child elements to close the parent modal
+            (document.querySelectorAll(".modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button") || []).forEach(($close) => {
+                const $target = $close.closest(".modal");
+
+                $close.addEventListener("click", () => {
+                    closeModal($target);
+                });
+            });
+
+            // Add a keyboard event to close all modals
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape") {
+                    closeAllModals();
+                }
+            });
+        });
+
+        document.getElementById("submitButton").addEventListener("click", function (event) {
+            // event.preventDefault();
+            // const variant = document.getElementsByName
+        });
+    </script>
+</html>

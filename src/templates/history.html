@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cafe Honda</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
+        <style></style>
+    </head>
+    <body>
+        <div class="section">
+            <figure class="image is-128x128 mx-auto">
+                <img src="/public/logo.png" />
+            </figure>
+            <div class="mb-6">
+                <a class="button" href="/">Home</a>
+                <a class="button" href="/order">Order</a>
+                <a class="button" href="/history">History</a>
+            </div>
+
+            <div class="box mb-6">
+                <p class="title is-4 has-text-centered">History</p>
+                <table class="table is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Time</th>
+                            <th>Item</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {{#each orders}}
+                        <tr>
+                            <th>1</th>
+                            <td>{{time}}</td>
+                            <td>{{variant}}</td>
+                            <td><button>delete</button></td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>
