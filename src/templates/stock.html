@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cafe Honda</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
+        <style></style>
+    </head>
+    <body>
+        <div class="section">
+            <figure class="image is-128x128 mx-auto">
+                <img src="/public/logo.png" />
+            </figure>
+            <div class="mb-6">
+                <a class="button" href="/">Home</a>
+                <a class="button" href="/order">Order</a>
+                <a class="button" href="/history">History</a>
+                <a class="button" href="/stock">Add Stock</a>
+            </div>
+
+            <div class="box mb-6">
+                <p class="title is-4 has-text-centered">Add Stock</p>
+                <form action="/stock" method="post">
+                    <div class="columns">
+                        <div class="column">
+                            {{#each drinks }}
+                            <div class="columns">
+                                <div class="column">
+                                    <label class="label">
+                                        <p>{{ name }}</p>
+                                        <p class="has-text-grey-light has-text-weight-light">(current: {{ quantity }} )</p>
+                                    </label>
+                                </div>
+                                <div class="column">
+                                    <button class="button is-primary is-medium minus-button mr-3">-</button>
+                                    <input class="input" name="{{ id }}" type="number" placeholder="0" style="width: 60px; height: 100%" />
+                                    <button class="button is-primary is-medium plus-button ml-3">+</button>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        <div class="column">
+                            {{#each snacks }}
+                            <div class="columns">
+                                <div class="column">
+                                    <label class="label">
+                                        <p>{{ name }}</p>
+                                        <p class="has-text-grey-light has-text-weight-light">(current: {{ quantity }} )</p>
+                                    </label>
+                                </div>
+                                <div class="column">
+                                    <button class="button is-primary is-medium minus-button mr-3">-</button>
+                                    <input class="input" name="{{ id }}" type="number" placeholder="0" style="width: 60px; height: 100%" />
+                                    <button class="button is-primary is-medium plus-button ml-3">+</button>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                    </div>
+                    <button class="button is-primary is-large is-fullwidth" type="submit">Add Stock</button>
+                </form>
+            </div>
+        </div>
+    </body>
+    <script>
+        const minusButton = document.querySelectorAll(".minus-button");
+
+        minusButton.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                const input = event.target.nextElementSibling;
+                input.value--;
+            });
+        });
+
+        const plusButton = document.querySelectorAll(".plus-button");
+
+        plusButton.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                const input = event.target.previousElementSibling;
+                input.value++;
+            });
+        });
+    </script>
+</html>

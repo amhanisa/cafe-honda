@@ -32,6 +32,16 @@ const init = async () => {
         path: "templates",
     });
 
+    Handlebars.registerHelper("formatTime", function (time) {
+        const datetime = new Date(Date.parse(time));
+
+        return datetime.toLocaleString("id-ID");
+    });
+
+    Handlebars.registerHelper("inc", function (value, options) {
+        return parseInt(value) + 1;
+    });
+
     await server.register(Inert);
 
     server.route({
@@ -39,17 +49,19 @@ const init = async () => {
         path: "/",
         handler: async (request, h) => {
             const pool = new Pool();
-            const result = await pool.query("SELECT * from items");
+            const result = await pool.query("SELECT * from items ORDER BY id ASC");
             const items = result.rows;
-
-            console.log(items);
 
             const drinks = items.filter((item) => item.type == "drink");
 
             const snacks = items.filter((item) => item.type == "snack");
 
             const data = { drinks, snacks };
+
+            console.log(items);
+
             console.log(data);
+
             return h.view("index", data);
         },
     });
@@ -97,12 +109,60 @@ const init = async () => {
         method: "GET",
         path: "/history",
         handler: async (request, h) => {
+            try {
+                const pool = new Pool();
+                const result = await pool.query(
+                    `SELECT orders.created_at as time, variants.name as variant, s.name as snack, d.name as drink
+                    FROM orders LEFT JOIN variants on orders.variant_id = variants.id
+                    LEFT JOIN items d on variants.drink_id = d.id  LEFT JOIN items s on variants.snack_id = s.id
+                    ORDER BY orders.created_at DESC`
+                );
+                const orders = result.rows;
+                const data = { orders };
+                console.log(orders);
+                return h.view("history", data);
+            } catch (e) {
+                console.log(e);
+            }
+        },
+    });
+
+    server.route({
+        method: "GET",
+        path: "/stock",
+        handler: async (request, h) => {
             const pool = new Pool();
-            const result = await pool.query("SELECT orders.created_at as time, variants.name as variant FROM orders LEFT JOIN variants on orders.variant_id = variants.id");
-            const orders = result.rows;
-            const data = { orders };
-            console.log(orders);
-            return h.view("history", data);
+            const result = await pool.query("SELECT * from items ORDER BY id ASC");
+            const items = result.rows;
+
+            const drinks = items.filter((item) => item.type == "drink");
+
+            const snacks = items.filter((item) => item.type == "snack");
+
+            const data = { drinks, snacks };
+            return h.view("stock", data);
+        },
+    });
+
+    server.route({
+        method: "POST",
+        path: "/stock",
+        handler: async (request, h) => {
+            const payload = request.payload;
+
+            await Promise.all(
+                Object.keys(payload).map(async function (key) {
+                    console.log(key + " - " + payload[key]);
+
+                    const stockQuantity = parseInt(payload[key]);
+                    if (stockQuantity > 0 || stockQuantity < 0) {
+                        const pool = new Pool();
+                        const result = await pool.query("UPDATE items set quantity = quantity + $1 WHERE id = $2", [stockQuantity, key]);
+                    }
+                })
+            );
+
+            return h.redirect("/");
         },
     });
 

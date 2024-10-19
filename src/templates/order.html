@@ -5,6 +5,28 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Cafe Honda</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
+        <style>
+            label {
+                width: 100%;
+            }
+
+            .card-input-element {
+                display: none;
+            }
+
+            .card-input {
+                margin: 10px;
+                padding: 00px;
+            }
+
+            .card-input:hover {
+                cursor: pointer;
+            }
+
+            .card-input-element:checked + .card-input {
+                box-shadow: 0 0 5px 5px #00d1b2;
+            }
+        </style>
     </head>
     <body>
         <div class="section">
@@ -15,24 +37,28 @@
                 <a class="button" href="/">Home</a>
                 <a class="button" href="/order">Order</a>
                 <a class="button" href="/history">History</a>
+                <a class="button" href="/stock">Add Stock</a>
             </div>
 
+            <p class="title is-4 has-text-centered">Select Variant</p>
             <form action="/order" method="post">
-                <div class="box mb-6">
-                    <p class="title is-4 has-text-centered">Select Variant</p>
-
-                    <div class="radios">
-                        {{#each variants}}
-                        <label class="radio">
-                            <input type="radio" name="variant" value="{{id}}" required />
-                            <p>{{name}}</p>
-                            <p>drink: {{drink}}</p>
-                            <p>snack: {{snack}}</p>
+                <div class="columns">
+                    {{#each variants}}
+                    <div class="column">
+                        <label>
+                            <input type="radio" name="variant" class="card-input-element" value="{{ id }}" required />
+                            <div class="panel panel-default card-input">
+                                <div class="panel-heading has-text-centered">{{ name }}</div>
+                                <div class="panel-block is-flex-direction-column">
+                                    <p>Drink: {{ drink }}</p>
+                                    <p>Snack: {{ snack }}</p>
+                                </div>
+                            </div>
                         </label>
-                        {{/each}}
                     </div>
+                    {{/each}}
                 </div>
-                <button class="button is-primary is-large is-fullwidth js-modal-trigger" id="submitButton">Add Order</button>
+                <button class="button is-primary is-large is-fullwidth js-modal-trigger" id="submitButton">Order</button>
             </form>
         </div>
         <div id="modal-js-example" class="modal">
