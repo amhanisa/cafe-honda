@@ -41,10 +41,10 @@ exports.up = (pgm) => {
 
     pgm.createTable("orders", {
         id: "id",
-        variant_id: {
+        item_id: {
             type: "integer",
             notNull: true,
-            references: '"variants"',
+            references: '"items"',
             onDelete: "cascade",
         },
         created_at: {
@@ -56,20 +56,14 @@ exports.up = (pgm) => {
 
     pgm.sql(`
         INSERT INTO items (name, quantity, type) VALUES
-        ('item 1', 10, 'drink'),
-        ('item 2', 10, 'drink'),
-        ('item 3', 10, 'drink'),
-        ('item 4', 10, 'snack'),
-        ('item 5', 10, 'snack'),
-        ('item 6', 10, 'snack');
-
-        INSERT INTO variants (name, drink_id, snack_id) VALUES
-        ('var 1', 1, 4),
-        ('var 2', 2, 5),
-        ('var 3', 3, 6),
-        ('var 4', 1, 6),
-        ('var 5', 2, 4),
-        ('var 6', 3, 5);
+        ('Es Kopi Susu Little Contrast', 10, 'drink'),
+        ('Coconut Apple', 10, 'drink'),
+        ('Hot Latte', 10, 'drink'),
+        ('Ice Matcha Little Contrast', 10, 'drink'),
+        ('Choco Croissant', 10, 'snack'),
+        ('Red Bean Sea Salt & Garlic Butter Bread', 10, 'snack'),
+        ('Almond Croissant', 10, 'snack'),
+        ('Butter Croissant', 10, 'snack');
         `);
 };
 

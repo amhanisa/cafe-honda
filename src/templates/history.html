@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Cafe Honda</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
-        <style></style>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
     </head>
     <body>
         <div class="section">
@@ -20,8 +21,56 @@
             </div>
 
             <div class="box mb-6">
+                <p class="title is-4 has-text-centered">Today's Orders</p>
+                <div class="columns">
+                    {{#each todayDrinks}}
+                    <div class="column has-text-centered">
+                        <div>
+                            <p class="heading">{{name}}</p>
+                            <p class="title">{{total}}</p>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+                <div class="columns">
+                    {{#each todaySnacks}}
+                    <div class="column has-text-centered">
+                        <div>
+                            <p class="heading">{{name}}</p>
+                            <p class="title">{{total}}</p>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+
+            <div class="box mb-6">
+                <p class="title is-4 has-text-centered">All Orders</p>
+                <div class="columns">
+                    {{#each allDrinks}}
+                    <div class="column has-text-centered">
+                        <div>
+                            <p class="heading">{{name}}</p>
+                            <p class="title">{{total}}</p>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+                <div class="columns">
+                    {{#each allSnacks}}
+                    <div class="column has-text-centered">
+                        <div>
+                            <p class="heading">{{name}}</p>
+                            <p class="title">{{total}}</p>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+
+            <div class="box mb-6">
                 <p class="title is-4 has-text-centered">History</p>
-                <table class="table is-fullwidth">
+                <table class="table is-fullwidth" id="historyTable">
                     <thead>
                         <tr>
                             <th>No</th>
@@ -35,7 +84,7 @@
                         <tr>
                             <th>{{inc @index}}</th>
                             <td>{{formatTime time}}</td>
-                            <td>{{variant}} ({{ snack }} & {{ drink }})</td>
+                            <td>{{ name }}</td>
                         </tr>
                         {{/each}}
                     </tbody>
@@ -43,4 +92,10 @@
             </div>
         </div>
     </body>
+    <script>
+        const dataTable = new simpleDatatables.DataTable("#historyTable", {
+            fixedHeight: true,
+            perPageSelect: [5, 10, 15, 20, 50, 100],
+        });
+    </script>
 </html>

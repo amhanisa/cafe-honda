@@ -71,14 +71,14 @@ const init = async () => {
         path: "/order",
         handler: async (request, h) => {
             const pool = new Pool();
-            const result = await pool.query(
-                "SELECT variants.id, variants.name as name,d.id as drink_id, d.name as drink, s.id as snack_id, s.name as snack from variants LEFT JOIN items d on variants.drink_id = d.id  LEFT JOIN items s on variants.snack_id = s.id"
-            );
-            const variants = result.rows;
+            const result = await pool.query("SELECT * from items ORDER BY id ASC");
+            const items = result.rows;
 
-            console.log(variants);
+            const drinks = items.filter((item) => item.type == "drink");
 
-            const data = { variants };
+            const snacks = items.filter((item) => item.type == "snack");
+
+            const data = { drinks, snacks };
             return h.view("order", data);
         },
     });
@@ -87,20 +87,19 @@ const init = async () => {
         method: "POST",
         path: "/order",
         handler: async (request, h) => {
-            const { variant } = request.payload;
-            console.log(variant);
-
-            const pool = new Pool();
-            const variantDetail = await pool.query("SELECT * FROM variants WHERE id = $1", [variant]);
-            const variants = variantDetail.rows[0];
-            const inputOrder = await pool.query("INSERT into orders (variant_id) VALUES ($1)", [variant]);
+            const { drink, snack } = request.payload;
             try {
-                await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = $1", [variants.drink_id]);
-                await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = $1", [variants.snack_id]);
+                const pool = new Pool();
+                await pool.query("INSERT into orders (item_id) VALUES ($1)", [drink]);
+                await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = $1", [drink]);
+
+                if (snack !== "none") {
+                    await pool.query("INSERT into orders (item_id) VALUES ($1)", [snack]);
+                    await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = $1", [snack]);
+                }
             } catch (e) {
                 console.log(e);
             }
-
             return h.redirect("/");
         },
     });
@@ -112,13 +111,37 @@ const init = async () => {
             try {
                 const pool = new Pool();
                 const result = await pool.query(
-                    `SELECT orders.created_at as time, variants.name as variant, s.name as snack, d.name as drink
-                    FROM orders LEFT JOIN variants on orders.variant_id = variants.id
-                    LEFT JOIN items d on variants.drink_id = d.id  LEFT JOIN items s on variants.snack_id = s.id
+                    `SELECT orders.created_at as time, items.name FROM orders
+                    LEFT JOIN items on orders.item_id = items.id
                     ORDER BY orders.created_at DESC`
                 );
                 const orders = result.rows;
-                const data = { orders };
+
+                const todayQuery = await pool.query(
+                    `select items.name, type, count(orders.id) as total from items
+                    left join orders on items.id = orders.item_id
+                    and orders.created_at::date = CURRENT_DATE
+                    group by items.id
+                    order by items.id asc;
+                    `
+                );
+                const today = todayQuery.rows;
+                const todayDrinks = today.filter((item) => item.type == "drink");
+                const todaySnacks = today.filter((item) => item.type == "snack");
+
+                const allQuery = await pool.query(
+                    `select items.name, type, count(orders.id) as total from items
+                    left join orders on items.id = orders.item_id
+                    and orders.created_at::date = CURRENT_DATE
+                    group by items.id
+                    order by items.id asc;
+                    `
+                );
+                const all = allQuery.rows;
+                const allDrinks = all.filter((item) => item.type == "drink");
+                const allSnacks = all.filter((item) => item.type == "snack");
+
+                const data = { orders, todayDrinks, todaySnacks, allDrinks, allSnacks };
                 console.log(orders);
                 return h.view("history", data);
             } catch (e) {
