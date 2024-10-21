@@ -16,6 +16,7 @@
         "@hapi/hapi": "^21.3.10",
         "@hapi/inert": "^7.1.0",
         "@hapi/vision": "^7.0.3",
+        "@hapi/yar": "^11.0.2",
         "dotenv": "^16.4.5",
         "handlebars": "^4.7.8",
         "node-pg-migrate": "^7.7.1",

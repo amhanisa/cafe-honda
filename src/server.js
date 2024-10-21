@@ -2,6 +2,7 @@ import Hapi from "@hapi/hapi";
 import Vision from "@hapi/vision";
 import Handlebars from "handlebars";
 import Inert from "@hapi/inert";
+import yar from "@hapi/yar";
 import { fileURLToPath } from "url";
 import path from "path";
 import pg from "pg";
@@ -19,6 +20,17 @@ const init = async () => {
         routes: {
             cors: {
                 origin: ["*"],
+            },
+        },
+    });
+
+    await server.register({
+        plugin: yar,
+        options: {
+            storeBlank: false,
+            cookieOptions: {
+                password: process.env.YARPASSWORD,
+                isSecure: true,
             },
         },
     });
@@ -53,14 +65,10 @@ const init = async () => {
             const items = result.rows;
 
             const drinks = items.filter((item) => item.type == "drink");
-
             const snacks = items.filter((item) => item.type == "snack");
 
-            const data = { drinks, snacks };
-
-            console.log(items);
-
-            console.log(data);
+            const flashMessages = request.yar.flash();
+            const data = { drinks, snacks, flashMessages: JSON.stringify(flashMessages) };
 
             return h.view("index", data);
         },
@@ -90,8 +98,10 @@ const init = async () => {
             const { drink, snack } = request.payload;
             try {
                 const pool = new Pool();
-                await pool.query("INSERT into orders (item_id) VALUES ($1)", [drink]);
-                await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = $1", [drink]);
+                if (drink !== "none") {
+                    await pool.query("INSERT into orders (item_id) VALUES ($1)", [drink]);
+                    await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = $1", [drink]);
+                }
 
                 if (snack !== "none") {
                     await pool.query("INSERT into orders (item_id) VALUES ($1)", [snack]);
@@ -100,6 +110,7 @@ const init = async () => {
             } catch (e) {
                 console.log(e);
             }
+            request.yar.flash("success", "Order added");
             return h.redirect("/");
         },
     });
@@ -142,7 +153,7 @@ const init = async () => {
                 const allSnacks = all.filter((item) => item.type == "snack");
 
                 const data = { orders, todayDrinks, todaySnacks, allDrinks, allSnacks };
-                console.log(orders);
+
                 return h.view("history", data);
             } catch (e) {
                 console.log(e);

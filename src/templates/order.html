@@ -6,6 +6,7 @@
         <title>Cafe Honda</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
         <link rel="stylesheet" href="public/style.css" />
+        <script src="public/index.var.js"></script>
         <style>
             label {
                 width: 100%;
@@ -22,9 +23,12 @@
             .card-input-element:checked + .card-input {
                 box-shadow: 0 0 5px 5px #00d1b2;
             }
+
+            .card-input-element:disabled + .card-input {
+                opacity: 0.3;
+            }
         </style>
     </head>
-    <script src="public/index.var.js"></script>
 
     <body>
         <div class="section">
@@ -44,7 +48,7 @@
                     {{#each drinks}}
                     <div class="cell">
                         <label>
-                            <input type="radio" name="drink" class="card-input-element" value="{{ id }}" required />
+                            <input type="radio" name="drink" class="card-input-element" value="{{ id }}" required {{#unless quantity}} disabled {{/unless}} />
                             <div class="card card-input py-3 is-flex is-align-items-center is-justify-content-center" style="height: 100%">
                                 <div class="card-content">
                                     <div class="content has-text-centered">{{ name }}</div>
@@ -53,13 +57,23 @@
                         </label>
                     </div>
                     {{/each}}
+                    <div class="cell">
+                        <label class="">
+                            <input type="radio" name="drink" class="card-input-element" value="none" required />
+                            <div class="card card-input py-3 is-flex is-align-items-center is-justify-content-center" style="height: 100%">
+                                <div class="card-content">
+                                    <div class="content has-text-centered">None</div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
                 </div>
                 <p class="title is-4 has-text-centered">Select Food</p>
                 <div class="grid">
                     {{#each snacks}}
                     <div class="cell">
                         <label class="">
-                            <input type="radio" name="snack" class="card-input-element" value="{{ id }}" required />
+                            <input type="radio" name="snack" class="card-input-element" value="{{ id }}" required {{#unless quantity}} disabled {{/unless}} />
                             <div class="card card-input py-3 is-flex is-align-items-center is-justify-content-center" style="height: 100%">
                                 <div class="card-content">
                                     <div class="content has-text-centered">{{ name }}</div>

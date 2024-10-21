@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Cafe Honda</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
-        <style></style>
+        <link rel="stylesheet" href="public/style.css" />
+        <script src="public/index.var.js"></script>
     </head>
     <body>
         <div class="section">
@@ -45,4 +46,17 @@
             <a href="order" class="button is-primary is-large is-fullwidth">Add Order</a>
         </div>
     </body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        let notifier = new AWN();
+
+          const flash = {{{flashMessages}}}; // Parse the flash messages JSON
+
+          if (flash.success) {
+            flash.success.forEach(message => {
+              notifier.success(message); // Show success message using Awesome Notifications
+            });
+          }
+        });
+    </script>
 </html>
