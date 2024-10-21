@@ -7,7 +7,6 @@
     "scripts": {
         "start:prod": "NODE_ENV=production node ./src/server.js",
         "start:dev": "nodemon ./src/server.js",
-        "migrate": "node-pg-migrate",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "",
@@ -21,9 +20,9 @@
         "bcrypt": "^5.1.1",
         "dotenv": "^16.4.5",
         "handlebars": "^4.7.8",
-        "node-pg-migrate": "^7.7.1",
-        "pg": "^8.13.0",
-        "pm2": "^5.4.2"
+        "mysql2": "^3.11.3",
+        "pm2": "^5.4.2",
+        "sequelize-cli": "^6.6.2"
     },
     "devDependencies": {
         "nodemon": "^3.1.7"

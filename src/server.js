@@ -7,10 +7,8 @@ import Basic from "@hapi/basic";
 import bcrypt from "bcrypt";
 import { fileURLToPath } from "url";
 import path from "path";
-import pg from "pg";
+import mysql from "mysql2/promise";
 import "dotenv/config";
-
-const { Pool } = pg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,16 +73,23 @@ const init = async () => {
 
     await server.register(Inert);
 
+    const pool = mysql.createPool({
+        host: process.env.DBHOST,
+        user: process.env.DBUSER,
+        database: process.env.DBDATABASE,
+        password: process.env.DBPASSWORD,
+        waitForConnections: true,
+        connectionLimit: 10,
+    });
+
     server.route({
         method: "GET",
         path: "/",
         handler: async (request, h) => {
-            const pool = new Pool();
-            const result = await pool.query("SELECT * from items ORDER BY id ASC");
-            const items = result.rows;
+            const [results] = await pool.query("SELECT * from items ORDER BY id ASC");
 
-            const drinks = items.filter((item) => item.type == "drink");
-            const snacks = items.filter((item) => item.type == "snack");
+            const drinks = results.filter((item) => item.type == "drink");
+            const snacks = results.filter((item) => item.type == "snack");
 
             const flashMessages = request.yar.flash();
             const data = { drinks, snacks, flashMessages: JSON.stringify(flashMessages) };
@@ -97,13 +102,11 @@ const init = async () => {
         method: "GET",
         path: "/order",
         handler: async (request, h) => {
-            const pool = new Pool();
-            const result = await pool.query("SELECT * from items ORDER BY id ASC");
-            const items = result.rows;
+            const [results] = await pool.query("SELECT * from items ORDER BY id ASC");
 
-            const drinks = items.filter((item) => item.type == "drink");
+            const drinks = results.filter((item) => item.type == "drink");
 
-            const snacks = items.filter((item) => item.type == "snack");
+            const snacks = results.filter((item) => item.type == "snack");
 
             const data = { drinks, snacks };
             return h.view("order", data);
@@ -116,15 +119,14 @@ const init = async () => {
         handler: async (request, h) => {
             const { drink, snack } = request.payload;
             try {
-                const pool = new Pool();
                 if (drink !== "none") {
-                    await pool.query("INSERT into orders (item_id) VALUES ($1)", [drink]);
-                    await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = $1", [drink]);
+                    await pool.query("INSERT into orders (item_id) VALUES (?)", [drink]);
+                    await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = ?", [drink]);
                 }
 
                 if (snack !== "none") {
-                    await pool.query("INSERT into orders (item_id) VALUES ($1)", [snack]);
-                    await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = $1", [snack]);
+                    await pool.query("INSERT into orders (item_id) VALUES (?)", [snack]);
+                    await pool.query("UPDATE items SET quantity = quantity - 1 WHERE id = ?", [snack]);
                 }
             } catch (e) {
                 console.log(e);
@@ -139,35 +141,30 @@ const init = async () => {
         path: "/history",
         handler: async (request, h) => {
             try {
-                const pool = new Pool();
-                const result = await pool.query(
+                const [orders] = await pool.query(
                     `SELECT orders.created_at as time, items.name FROM orders
                     LEFT JOIN items on orders.item_id = items.id
                     ORDER BY orders.created_at DESC`
                 );
-                const orders = result.rows;
 
-                const todayQuery = await pool.query(
+                const [today] = await pool.query(
                     `select items.name, type, count(orders.id) as total from items
                     left join orders on items.id = orders.item_id
-                    and orders.created_at::date = CURRENT_DATE
+                    and DATE(orders.created_at) = CURDATE()
                     group by items.id
                     order by items.id asc;
                     `
                 );
-                const today = todayQuery.rows;
                 const todayDrinks = today.filter((item) => item.type == "drink");
                 const todaySnacks = today.filter((item) => item.type == "snack");
 
-                const allQuery = await pool.query(
+                const [all] = await pool.query(
                     `select items.name, type, count(orders.id) as total from items
                     left join orders on items.id = orders.item_id
-                    and orders.created_at::date = CURRENT_DATE
                     group by items.id
                     order by items.id asc;
                     `
                 );
-                const all = allQuery.rows;
                 const allDrinks = all.filter((item) => item.type == "drink");
                 const allSnacks = all.filter((item) => item.type == "snack");
 
@@ -184,9 +181,7 @@ const init = async () => {
         method: "GET",
         path: "/stock",
         handler: async (request, h) => {
-            const pool = new Pool();
-            const result = await pool.query("SELECT * from items ORDER BY id ASC");
-            const items = result.rows;
+            const [items] = await pool.query("SELECT * from items ORDER BY id ASC");
 
             const drinks = items.filter((item) => item.type == "drink");
 
@@ -209,8 +204,7 @@ const init = async () => {
 
                     const stockQuantity = parseInt(payload[key]);
                     if (stockQuantity > 0 || stockQuantity < 0) {
-                        const pool = new Pool();
-                        const result = await pool.query("UPDATE items set quantity = quantity + $1 WHERE id = $2", [stockQuantity, key]);
+                        const result = await pool.query("UPDATE items set quantity = quantity + ? WHERE id = ?", [stockQuantity, key]);
                     }
                 })
             );
