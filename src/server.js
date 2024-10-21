@@ -47,7 +47,7 @@ const init = async () => {
             storeBlank: false,
             cookieOptions: {
                 password: process.env.YARPASSWORD,
-                isSecure: true,
+                isSecure: false,
             },
         },
     });
@@ -92,7 +92,7 @@ const init = async () => {
             const snacks = results.filter((item) => item.type == "snack");
 
             const flashMessages = request.yar.flash();
-            console.log(flashMessages);
+
             const data = { drinks, snacks, flashMessages: JSON.stringify(flashMessages) };
 
             return h.view("index", data);
