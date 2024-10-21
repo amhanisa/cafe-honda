@@ -2,7 +2,9 @@ import Hapi from "@hapi/hapi";
 import Vision from "@hapi/vision";
 import Handlebars from "handlebars";
 import Inert from "@hapi/inert";
-import yar from "@hapi/yar";
+import Yar from "@hapi/yar";
+import Basic from "@hapi/basic";
+import bcrypt from "bcrypt";
 import { fileURLToPath } from "url";
 import path from "path";
 import pg from "pg";
@@ -12,6 +14,18 @@ const { Pool } = pg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const validate = async (request, username, password, h) => {
+    if (username != process.env.LOGINUSER) {
+        console.log("masuk");
+        return { credentials: null, isValid: false };
+    }
+
+    const isValid = await bcrypt.compare(password, process.env.LOGINPASS);
+    const credentials = { name: process.env.LOGINUSER };
+
+    return { isValid, credentials };
+};
 
 const init = async () => {
     const server = Hapi.server({
@@ -24,8 +38,13 @@ const init = async () => {
         },
     });
 
+    await server.register(Basic);
+
+    server.auth.strategy("simple", "basic", { validate });
+    server.auth.default("simple");
+
     await server.register({
-        plugin: yar,
+        plugin: Yar,
         options: {
             storeBlank: false,
             cookieOptions: {
