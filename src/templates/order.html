@@ -93,7 +93,7 @@
                         </label>
                     </div>
                 </div>
-                <button class="button is-primary is-large is-fullwidth" id="formSubmit">Order</button>
+                <button class="button is-primary is-large is-fullwidth" type="submit" id="formSubmit">Order</button>
             </form>
         </div>
     </body>
@@ -103,7 +103,7 @@
         document.getElementById("formSubmit").addEventListener("click", function (event) {
             var drink = document.querySelector('input[name = "drink"]:checked');
             var snack = document.querySelector('input[name = "snack"]:checked');
-
+            this.classList.add("is-loading");
             if (drink == null || snack == null) {
                 event.preventDefault();
                 if (drink == null) {
@@ -112,6 +112,7 @@
                 if (snack == null) {
                     notifier.alert("Please select a food");
                 }
+                this.classList.remove("is-loading");
             }
         });
     </script>

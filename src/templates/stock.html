@@ -58,7 +58,7 @@
                             {{/each}}
                         </div>
                     </div>
-                    <button class="button is-primary is-large is-fullwidth" type="submit">Add Stock</button>
+                    <button class="button is-primary is-large is-fullwidth" id="formSubmit" type="submit">Add Stock</button>
                 </form>
             </div>
         </div>
@@ -82,6 +82,10 @@
                 const input = event.target.previousElementSibling;
                 input.value++;
             });
+        });
+
+        document.getElementById("formSubmit").addEventListener("click", function (event) {
+            this.classList.add("is-loading");
         });
     </script>
 </html>
